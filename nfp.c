@@ -32,6 +32,18 @@ struct template *get_template(uint16_t type)
 }
 /* --------------------------- */
 
+void handle_bad_fread(gzFile file)
+{
+	if (gzeof(file)) {
+		printf("[.EOF]\n");
+		exit(EXIT_SUCCESS);
+	}
+	else {
+		fprintf(stderr, "[.ERR] gzread: %s\n", gzerror(file, NULL));
+		exit(EXIT_FAILURE);
+	}
+}
+
 void print_hex(void *in, int start, int end)
 {
 	uint8_t *array = (uint8_t *)in;
@@ -89,7 +101,7 @@ int parse_flow_set(gzFile file, int id, int length)
 	int l2 = gzread(file, buffer, flowset_length);
 	if (l2 != flowset_length) {
 		free(buffer);
-		return -1;
+		handle_bad_fread(file);
 	}
 
 	if (debug) {
@@ -117,7 +129,7 @@ int parse_options_template_set(gzFile file, int length)
 	int l2 = gzread(file, buffer, flowset_length);
 	if (l2 != flowset_length) {
 		free(buffer);
-		return -1;
+		handle_bad_fread(file);
 	}
 
 	if (debug) {
@@ -159,7 +171,7 @@ int parse_template_set(gzFile file, int length)
 	int l2 = gzread(file, buffer, flowset_length);
 	if (l2 != flowset_length) {
 		free(buffer);
-		return -1;
+		handle_bad_fread(file);
 	}
 
 	if (debug) {
@@ -226,7 +238,7 @@ int parse_set(gzFile file)
 	struct ipfix_set_header header;
 	int    len = sizeof(struct ipfix_set_header);
 	if (gzread(file, &header, len) != len) {
-		return -2;
+		handle_bad_fread(file);
 	}
 
 	if (debug) {
@@ -312,14 +324,7 @@ int main(int argc, char *argv[])
 			memset(&header, 0, sizeof(struct ipfix_header));
 			rc = gzread(file, &header, sizeof(struct ipfix_header));
 			if (rc != sizeof(struct ipfix_header)) {
-				if (gzeof(file)) {
-					printf("[.EOF]\n");
-					exit(EXIT_SUCCESS);
-				}
-				else {
-					fprintf(stderr, "[ ERR] gzread: %s\n", gzerror(file, NULL));
-					exit(EXIT_FAILURE);
-				}
+				handle_bad_fread(file);
 			}
 
 			if (htons(header.version) != 9) {
