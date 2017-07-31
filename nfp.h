@@ -10,7 +10,7 @@ struct template
 struct ipfix_header
 {
         uint16_t version;
-        uint16_t length;
+        uint16_t rcount;
 	uint32_t uptime;
         uint32_t export_ts;
         uint32_t seq_no;
@@ -90,10 +90,6 @@ static const char* nf_type_str[] = {
 
 void print_hex(void *, int, int);
 void print_help(char *);
-
-int parse_bgp_path_attr_aspath(uint8_t *, int);
-int parse_entry(uint8_t *);
-int parse_ipvN_unicast(uint8_t *, int);
 
 #endif
 

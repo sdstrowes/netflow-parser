@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
 
 		printf("\n");
 		printf("[HEAD] Version: %x\n",      htons(header.version));
-		printf("[HEAD] Record Count: %u\n", htons(header.length));
+		printf("[HEAD] Record Count: %u\n", htons(header.rcount));
 		printf("[HEAD] Uptime: %u\n",       htonl(header.uptime));
 		printf("[HEAD] Export: %u\n",       htonl(header.export_ts));
 		printf("[HEAD] Seq No: %u\n",       htonl(header.seq_no));
@@ -354,15 +354,15 @@ int main(int argc, char *argv[])
 
 		int record_count;
 		//int bytes = sizeof(struct ipfix_header);
-		for (record_count = 0; record_count < htons(header.length); ) {
+		for (record_count = 0; record_count < htons(header.rcount); ) {
 			rc = parse_set(file);
 			// hack hack hack: the flow_set will bail out if the set ID looks wrong
 			// I've spotted this in probably-bad netflow dumps that list too many
 			// records? hacking around it to understand the format.
 			if (rc == 0) {
-				if (record_count != htons(header.length)) {
+				if (record_count != htons(header.rcount)) {
 					printf("[WARN] Bailed before number of headers was apparently read (%u != %u)\n",
-						record_count, htons(header.length));
+						record_count, htons(header.rcount));
 				}
 				break;
 			}
