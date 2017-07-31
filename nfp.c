@@ -36,10 +36,13 @@ void handle_bad_fread(gzFile file)
 {
 	if (gzeof(file)) {
 		printf("[.EOF]\n");
+		free(templates);
+		gzclose(file);
 		exit(EXIT_SUCCESS);
 	}
 	else {
 		fprintf(stderr, "[.ERR] gzread: %s\n", gzerror(file, NULL));
+		gzclose(file);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -372,6 +375,7 @@ int main(int argc, char *argv[])
 	}
 
 	free(templates);
+	gzclose(file);
 
 	return EXIT_SUCCESS;
 }
