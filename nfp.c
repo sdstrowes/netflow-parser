@@ -356,24 +356,15 @@ int main(int argc, char *argv[])
 		//int bytes = sizeof(struct ipfix_header);
 		for (record_count = 0; record_count < htons(header.length); ) {
 			rc = parse_set(file);
-			if (rc == -2) {
-				printf("EOF\n");
-				exit(EXIT_SUCCESS);
-			}
-			if (rc == -1) {
-				fprintf(stderr, "Failed to parse set at record %u\n", record_count);
-				fprintf(stderr, "Re-run with \'-d\'\n");
-				exit(EXIT_FAILURE);
-			}
 			// hack hack hack: the flow_set will bail out if the set ID looks wrong
 			// I've spotted this in probably-bad netflow dumps that list too many
 			// records? hacking around it to understand the format.
-			else if (rc == 0) {
+			if (rc == 0) {
 				if (record_count != htons(header.length)) {
 					printf("[WARN] Bailed before number of headers was apparently read (%u != %u)\n",
 						record_count, htons(header.length));
 				}
-				record_count = htons(header.length);
+				break;
 			}
 	
 			record_count += rc;
